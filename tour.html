@@ -12,13 +12,13 @@
     <script src="https://code.jquery.com/jquery-3.6.0.js"
         integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
 
-    <!-- Bootstrap 4.6 -->
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
-        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js"
-        integrity="sha384-VHvPCCyXqtD5DqJeNxl2dtTyhF78xXNXdkwX1CZeRusQfRKp+tA7hAShOK/B/fQ2"
-        crossorigin="anonymous"></script>
+
+
+    <!-- slick①↓↓↓ -->
+    <!-- Add the slick-theme.css if you want default styling -->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+    <!-- Add the slick-theme.css if you want default styling -->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
         integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
@@ -29,11 +29,20 @@
         .thumb {
             width: 200px;
         }
+
+        .sliders img {
+            height: 300px;
+        }
     </style>
 </head>
 
 <body>
     <div id="app" class="container">
+        <div class="jumbotron">
+            <div class="sliders">
+
+            </div>
+        </div>
         <select id="city"></select>
         <div id="paginator"></div>
         <table id="list" class="table">
@@ -52,7 +61,15 @@
         </table>
     </div>
 
-
+    <!-- slick②↓↓↓ -->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    <!-- Bootstrap 4.6 -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js"
+        integrity="sha384-VHvPCCyXqtD5DqJeNxl2dtTyhF78xXNXdkwX1CZeRusQfRKp+tA7hAShOK/B/fQ2"
+        crossorigin="anonymous"></script>
 </body>
 
 </html>
@@ -68,7 +85,7 @@
     // 先設一個空的全域變數，跳到第幾頁時會用到
     let source;
     $.get("https://data.coa.gov.tw/OpenData/Service/OpenData/ODwsv/ODwsvTravelStay.aspx", (res) => {
-        // console.log(res);
+        console.log(res);
         res.forEach(item => {
             // console.log(item.City);
             // 如果city陣列裡沒有api資料中的city，那就把資料push進city陣列中
@@ -78,12 +95,29 @@
         })
         // console.log(city);
 
+        // datatable縣市排序，不是下拉選單縣市排序
         res.sort(function (a, b) {
             return a.City.localeCompare(b.City);
         });
 
         // ▲指定為全域變數
         source = res;
+
+        // 上面的輪播圖
+        let sliders = res.slice(0, 5);
+        sliders.forEach(item => {
+            let img = `<div><img src='${item.Photo}'></div>`;
+            $(".sliders").append(img);
+        })
+
+        $(".sliders").slick({
+            dots:true,
+            infinite: true,
+            slidesToShow: 2,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 2000,
+        })
 
         // 呼叫製作下拉選單的函式，一開始是全部city
         makeDropSelect(city);
@@ -152,9 +186,8 @@
             let pg = "";
             let prev = (now - 1 > 0) ? now - 1 : 1;
             pg = `<a href='javascript:page(${prev})'> < </a>`;
-            for (let i = 1; i < pages; i++) {
+            for (let i = 1; i <= pages; i++) {
                 pg = pg + `<a href='javascript:page(${i})'> &nbsp; ${i} &nbsp; </a>`;
-
             }
             let next = (now + 1 <= pages) ? now + 1 : pages;
             pg = pg + `<a href='javascript:page(${next})'> > </a>`;
