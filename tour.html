@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="#">
+    <title>國內旅遊農場</title>
+
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap 4.6 -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js"
+        integrity="sha384-VHvPCCyXqtD5DqJeNxl2dtTyhF78xXNXdkwX1CZeRusQfRKp+tA7hAShOK/B/fQ2"
+        crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+        integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+    <link rel="shortcut icon" href="#" type="image/x-icon">
+
+    <style>
+        .thumb {
+            width: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <select id="city"></select>
+        <div id="paginator"></div>
+        <table id="list" class="table">
+            <thead>
+                <tr>
+                    <th>縮圖(Photo)</th>
+                    <th>名稱(Name)</th>
+                    <th>地址(Address)</th>
+                    <th>電話(Tel)</th>
+                    <th>開放時間(OpenHours)</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+
+</body>
+
+</html>
+
+<script>
+    // ↓↓↓先console出來看看有沒有成功抓到資料
+    // $.get("https://data.coa.gov.tw/OpenData/Service/OpenData/ODwsv/ODwsvTravelStay.aspx", (res) => {
+    //     console.log(res);
+    // })
+
+    // ▲撈出資料
+    let city = new Array();
+    // 先設一個空的全域變數，跳到第幾頁時會用到
+    let source;
+    $.get("https://data.coa.gov.tw/OpenData/Service/OpenData/ODwsv/ODwsvTravelStay.aspx", (res) => {
+        // console.log(res);
+        res.forEach(item => {
+            // console.log(item.City);
+            // 如果city陣列裡沒有api資料中的city，那就把資料push進city陣列中
+            if (city.indexOf(item.City) == -1) {
+                city.push(item.City);
+            }
+        })
+        // console.log(city);
+
+        res.sort(function (a, b) {
+            return a.City.localeCompare(b.City);
+        });
+
+        // ▲指定為全域變數
+        source = res;
+
+        // 呼叫製作下拉選單的函式，一開始是全部city
+        makeDropSelect(city);
+        // 呼叫製作datatable的函式，一開始是全部city，第一頁，所以用res
+        makeDataTable(res, "全部", 1);
+
+        // 當選到那個城市時，
+        $("#city").on("change", (e) => {
+            // 印出來看看要用的資料要取到第幾層
+            // console.log($(e.target).val());
+            // 抓到選單的city字串
+            let selectCity = $(e.target).val();
+            // 丟到makedatatable去重抓資料放到陣列，這樣datatable就會是只有該城市的資料
+            makeDataTable(res, selectCity, 1);
+        })
+    })
+
+    function page(num) {
+        // console.log(num);
+        makeDataTable(source, '全部', num)
+    }
+
+    // ▲製作下拉選單的函式
+    function makeDropSelect(array) {
+        let option = "";
+        array.forEach(city => {
+            option = option + `<option value='${city}'>${city}</option>`;
+        })
+        $("#city").html(option);
+    }
+
+    // ▲DIY製作datatable表格的函式
+    function makeDataTable(data, city, page) {
+
+        let tr, td, text, img, show;
+        let tableData;
+        let cell = ['Photo', 'Name', 'Address', 'Tel', 'OpenHours'];
+
+        if (city == "全部") {
+            show = data;
+        } else {
+            show = new Array();
+            data.forEach(item => {
+                if (item.City == city) {
+                    show.push(item);
+                }
+            })
+        }
+
+        // 先清空不然會衝到
+        $("#list tbody").html("");
+
+        // ▲製作分頁
+        let all = data.length;
+        let div = 10;
+        let pages = Math.ceil(all / 10);
+        let now = page;
+        let start = (now - 1) * div;
+        // ↓↓↓arr.slice(begin, end)begin 為開始的索引值，負數代表從後面開始算起，-1為倒數第一個元素。end 為結束的索引值，沒有填寫時則得到arr中的所有元素。
+        tableData = show.slice(start, (start + div));
+        // console.log(tableData);
+
+        let pg = "";
+
+        $("#paginator").html(function () {
+            let pg = "";
+            let prev = (now - 1 > 0) ? now - 1 : 1;
+            pg = `<a href='javascript:page(${prev})'> < </a>`;
+            for (let i = 1; i < pages; i++) {
+                pg = pg + `<a href='javascript:page(${i})'> &nbsp; ${i} &nbsp; </a>`;
+
+            }
+            let next = (now + 1 <= pages) ? now + 1 : pages;
+            pg = pg + `<a href='javascript:page(${next})'> > </a>`;
+            return pg;
+        })
+
+        tableData.forEach(d => {
+            tr = document.createElement("tr");
+            cell.forEach((c, idx) => {
+                // 先建td殼
+                td = document.createElement("td");
+
+                // idx等於零，c=Photo的情況下
+                if (idx == 0) {
+                    // 先建img殼
+                    let img = document.createElement("img");
+                    // 就可以對img進行設定src↓↓↓
+                    img.setAttribute("src", d[c]);
+                    // 對img進行設定class↓↓↓
+                    img.setAttribute("class", 'thumb');
+                    td.appendChild(img);
+                } else {
+                    // 再建文字
+                    text = document.createTextNode(d[c]);
+                    // 先在建好的td裡塞文字
+                    td.appendChild(text);
+                }
+                // 再在tr後加入經過上面整組湊好的td
+                tr.appendChild(td);
+            })
+
+            // 上方td都完成了之後，在#list塞好整組湊好的tr
+            $("#list tbody").append(tr);
+        })
+
+    }
+
+</script>
