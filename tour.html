@@ -58,9 +58,10 @@
         }
 
         #paginator a:hover {
-            background-color:darkseagreen;
+            background-color: darkseagreen;
         }
-        .sel-page{
+
+        .sel-page {
             background-color: burlywood;
         }
     </style>
@@ -105,6 +106,22 @@
 </html>
 
 <script>
+    // ★以下主要順序
+    // 1．確認有沒有抓到資料的函式
+    // 2．載入頁面時要執行
+    // 　　①．輪播圖(此時的data應該預設城市及頁數)
+    // 　　②．下拉→全部城市
+    // 　　③．datatable→排序完的全部城市
+    // 3．輪播圖函式
+    // 4．頁數函式，用來決定makeDataTable函式的頁數部分
+    // 5．下拉選單函式
+    // 6．DIY製作datatable表格的函式
+    // 　　①．先準備好要用到的成員(變數)，及城市定義有二種變成show
+    // 　　②．製作分頁
+    // 　　③．開始用整合好的tableData變數，充實前面設好的空成員(變數)變成tr回填至html
+    // 7．過設定好城市(判斷是全部/一個)後，再設定好分頁的tableData設定好用前五個丟給sliderData變數讓輪播圖有5個內容可播
+
+    // 以下正式開始
     // ↓↓↓先console出來看看有沒有成功抓到資料
     // $.get("https://data.coa.gov.tw/OpenData/Service/OpenData/ODwsv/ODwsvTravelStay.aspx", (res) => {
     //     console.log(res);
@@ -112,7 +129,7 @@
 
     // ▲撈出資料
     let city = new Array();
-    // 先設一個空的全域變數，跳到第幾頁時會用到
+    // ↓↓↓先設一個空的全域變數，跳到第幾頁時會用到
     let source;
     $.get("https://data.coa.gov.tw/OpenData/Service/OpenData/ODwsv/ODwsvTravelStay.aspx", (res) => {
         console.log(res);
@@ -130,18 +147,18 @@
             return a.City.localeCompare(b.City);
         });
 
-        // ▲指定為全域變數
+        // ▲排序完的city指定為全域變數
         source = res;
+
+
+        // 然後執行一次slick的sliders
         $(".sliders").slick();
-
-
-
         // 呼叫製作下拉選單的函式，一開始是全部city
         makeDropSelect(city);
         // 呼叫製作datatable的函式，一開始是全部city，第一頁，所以用res
         makeDataTable(res, "全部", 1);
 
-        // 當選到那個城市時，
+        // 當選到那個城市時，datatable變成載入只有那個城市的觀光地
         $("#city").on("change", (e) => {
             // 印出來看看要用的資料要取到第幾層
             // console.log($(e.target).val());
@@ -152,9 +169,13 @@
         })
     })
 
+    // ▲slick輪播圖:為何slick會隨頁數及城市變換，因為這裡的data是最後一行的sliderData變數
+    // sliderData的前身是tableData變數，有先經過城市判斷變成show，再經過頁數判斷指派給tableData變數
     function sliders(data) {
-        // 以下二行順序勿搞混
+        // 以下二個清空順序勿搞混，要先清楚這樣點選下一個城市時才不會殘留上一個城市的資料
+        // 先清空記憶體裡的slick
         $(".sliders").slick("unslick");
+        // 也清空class為slick的html內容
         $(".sliders").html("");
         data.forEach(item => {
             let img = `<div style='position:relative'>
@@ -174,6 +195,7 @@
         })
     }
 
+    // ▲頁數函式
     function page(num) {
         // console.log(num);
         makeDataTable(source, '全部', num)
@@ -188,7 +210,8 @@
         $("#city").html(option);
     }
 
-    // ▲DIY製作datatable表格的函式
+    // ▲DIY製作datatable表格的函式↓↓↓
+    // ◆ 一．先準備好要用到的成員(變數)，及城市定義有二種變成show
     function makeDataTable(data, city, page) {
 
         let tr, td, text, img, show;
@@ -206,10 +229,10 @@
             })
         }
 
-        // 先清空不然會衝到
+        // 先清空不然載入不同城市時會衝到
         $("#list tbody").html("");
 
-        // ▲製作分頁
+        // ◆ 二．製作分頁
         let all = data.length;
         let div = 10;
         let pages = Math.ceil(all / 10);
@@ -227,8 +250,8 @@
             pg = `<a href='javascript:page(${prev})'> < </a>`;
 
             for (let i = 1; i <= pages; i++) {
-                // 當前頁著色
-                let sel=(i==page)?'sel-page':'';
+                // 當前頁背景著色
+                let sel = (i == page) ? 'sel-page' : '';
                 pg = pg + `<a href='javascript:page(${i})' class='${sel}'> &nbsp; ${i} &nbsp; </a>`;
             }
 
@@ -237,6 +260,7 @@
             return pg;
         })
 
+        // ◆ 開始用整合好的tableData變數，充實前面設好的空成員(變數)，並用這些成員裝好dom的殼及內容後，回填到html裡
         tableData.forEach(d => {
             tr = document.createElement("tr");
             cell.forEach((c, idx) => {
@@ -261,12 +285,13 @@
                 // 再在tr後加入經過上面整組湊好的td
                 tr.appendChild(td);
             })
-
             // 上方td都完成了之後，在#list塞好整組湊好的tr
             $("#list tbody").append(tr);
         })
+        // 經過設定好城市(判斷是全部/一個)後，再設定好分頁的tableData設定好用前五個丟給sliderData變數讓輪播圖有5個內容可播
         let sliderData = tableData.slice(0, 5);
         sliders(sliderData);
     }
+// ▲DIY製作datatable表格的函式結束↑↑↑
 
 </script>
