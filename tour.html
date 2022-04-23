@@ -33,10 +33,11 @@
         .sliders img {
             height: 300px;
         }
-        .img-header{
-            position:absolute;
+
+        .img-header {
+            position: absolute;
             top: 0;
-            left:0;
+            left: 0;
             background-color: rgba(200, 200, 200, 0.6);
             text-align: center;
             font-weight: bolder;
@@ -44,6 +45,23 @@
             width: 100%;
             padding: 10px 0;
             text-shadow: 0 0 5px rgba(200, 200, 200, 0.6);
+        }
+
+        #paginator {
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        #paginator a {
+            padding: 3px;
+            border: 1px solid gray;
+        }
+
+        #paginator a:hover {
+            background-color:darkseagreen;
+        }
+        .sel-page{
+            background-color: burlywood;
         }
     </style>
 </head>
@@ -115,7 +133,7 @@
         // ▲指定為全域變數
         source = res;
         $(".sliders").slick();
-        
+
 
 
         // 呼叫製作下拉選單的函式，一開始是全部city
@@ -207,9 +225,13 @@
             let pg = "";
             let prev = (now - 1 > 0) ? now - 1 : 1;
             pg = `<a href='javascript:page(${prev})'> < </a>`;
+
             for (let i = 1; i <= pages; i++) {
-                pg = pg + `<a href='javascript:page(${i})'> &nbsp; ${i} &nbsp; </a>`;
+                // 當前頁著色
+                let sel=(i==page)?'sel-page':'';
+                pg = pg + `<a href='javascript:page(${i})' class='${sel}'> &nbsp; ${i} &nbsp; </a>`;
             }
+
             let next = (now + 1 <= pages) ? now + 1 : pages;
             pg = pg + `<a href='javascript:page(${next})'> > </a>`;
             return pg;
@@ -243,7 +265,7 @@
             // 上方td都完成了之後，在#list塞好整組湊好的tr
             $("#list tbody").append(tr);
         })
-        let sliderData=tableData.slice(0,5);
+        let sliderData = tableData.slice(0, 5);
         sliders(sliderData);
     }
 
