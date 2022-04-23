@@ -33,6 +33,18 @@
         .sliders img {
             height: 300px;
         }
+        .img-header{
+            position:absolute;
+            top: 0;
+            left:0;
+            background-color: rgba(200, 200, 200, 0.6);
+            text-align: center;
+            font-weight: bolder;
+            font-size: 1.2em;
+            width: 100%;
+            padding: 10px 0;
+            text-shadow: 0 0 5px rgba(200, 200, 200, 0.6);
+        }
     </style>
 </head>
 
@@ -102,22 +114,9 @@
 
         // ▲指定為全域變數
         source = res;
+        $(".sliders").slick();
+        
 
-        // 上面的輪播圖
-        let sliders = res.slice(0, 5);
-        sliders.forEach(item => {
-            let img = `<div><img src='${item.Photo}'></div>`;
-            $(".sliders").append(img);
-        })
-
-        $(".sliders").slick({
-            dots:true,
-            infinite: true,
-            slidesToShow: 2,
-            slidesToScroll: 1,
-            autoplay: true,
-            autoplaySpeed: 2000,
-        })
 
         // 呼叫製作下拉選單的函式，一開始是全部city
         makeDropSelect(city);
@@ -134,6 +133,28 @@
             makeDataTable(res, selectCity, 1);
         })
     })
+
+    function sliders(data) {
+        // 以下二行順序勿搞混
+        $(".sliders").slick("unslick");
+        $(".sliders").html("");
+        data.forEach(item => {
+            let img = `<div style='position:relative'>
+                <div class='img-header'>${item.Name}</div>
+                <img src='${item.Photo}'>
+                </div>`;
+            $(".sliders").append(img);
+        })
+
+        $(".sliders").slick({
+            dots: true,
+            infinite: true,
+            slidesToShow: 2,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 2000,
+        })
+    }
 
     function page(num) {
         // console.log(num);
@@ -222,7 +243,8 @@
             // 上方td都完成了之後，在#list塞好整組湊好的tr
             $("#list tbody").append(tr);
         })
-
+        let sliderData=tableData.slice(0,5);
+        sliders(sliderData);
     }
 
 </script>
