@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="#">
+    <title>美術收藏品-示範如何將得到的資料下載→塞到資料庫中</title>
+
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+
+
+
+    <!-- slick①↓↓↓ -->
+    <!-- Add the slick-theme.css if you want default styling -->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+    <!-- Add the slick-theme.css if you want default styling -->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+        integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+    <link rel="shortcut icon" href="#" type="image/x-icon">
+
+    <style>
+        .thumb {
+            width: 200px;
+        }
+
+        .sliders img {
+            height: 300px;
+        }
+
+        .img-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: rgba(200, 200, 200, 0.6);
+            text-align: center;
+            font-weight: bolder;
+            font-size: 1.2em;
+            width: 100%;
+            padding: 10px 0;
+            text-shadow: 0 0 5px rgba(200, 200, 200, 0.6);
+        }
+
+        #paginator {
+            margin: 0px auto;
+            text-align: center;
+        }
+
+        #paginator a {
+            padding: 3px;
+            border: 1px solid gray;
+        }
+
+        #paginator a:hover {
+            background-color: darkseagreen;
+        }
+
+        .sel-page {
+            background-color: burlywood;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <div>
+            <div class="sliders">
+
+            </div>
+        </div>
+        <div class="d-flex">
+            <select id="city"></select>
+            <div id="paginator"></div>
+        </div>
+        <table id="list" class="table">
+            <thead>
+                <tr>
+                    <th>縮圖(Photo)</th>
+                    <th>名稱(Name)</th>
+                    <th>地址(Address)</th>
+                    <th>電話(Tel)</th>
+                    <th>開放時間(OpenHours)</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- slick②↓↓↓ -->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    <!-- Bootstrap 4.6 -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js"
+        integrity="sha384-VHvPCCyXqtD5DqJeNxl2dtTyhF78xXNXdkwX1CZeRusQfRKp+tA7hAShOK/B/fQ2"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
+
+<script>
+    // ▲撈出資料
+    // jQuery中的getJSON()方法使用GET HTTP請求從服務器獲取JSON-encoded數據。
+    $.getJSON("getcollection.php", (res) => {
+        console.log(res);
+    })
+
+</script>
