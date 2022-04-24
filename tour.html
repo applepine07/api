@@ -48,7 +48,7 @@
         }
 
         #paginator {
-            margin: 20px auto;
+            margin: 0px auto;
             text-align: center;
         }
 
@@ -69,13 +69,15 @@
 
 <body>
     <div id="app" class="container">
-        <div class="jumbotron">
+        <div>
             <div class="sliders">
 
             </div>
         </div>
-        <select id="city"></select>
-        <div id="paginator"></div>
+        <div class="d-flex">
+            <select id="city"></select>
+            <div id="paginator"></div>
+        </div>
         <table id="list" class="table">
             <thead>
                 <tr>
@@ -132,7 +134,11 @@
     // ↓↓↓先設一個空的全域變數，跳到第幾頁時會用到
     let source;
     $.get("https://data.coa.gov.tw/OpenData/Service/OpenData/ODwsv/ODwsvTravelStay.aspx", (res) => {
-        console.log(res);
+        // console.log(res);
+        // 將res用sort排序，這樣下拉選單、和makedatatable都是排序過後的資料
+        res.sort(function (a, b) {
+            return a.City.localeCompare(b.City);
+        });
         res.forEach(item => {
             // console.log(item.City);
             // 如果city陣列裡沒有api資料中的city，那就把資料push進city陣列中
@@ -142,14 +148,8 @@
         })
         // console.log(city);
 
-        // datatable縣市排序，不是下拉選單縣市排序
-        res.sort(function (a, b) {
-            return a.City.localeCompare(b.City);
-        });
-
-        // ▲排序完的city指定為全域變數
+        // ▲排序完的res指定為全域變數
         source = res;
-
 
         // 然後執行一次slick的sliders
         $(".sliders").slick();
@@ -196,14 +196,14 @@
     }
 
     // ▲頁數函式
-    function page(num) {
-        // console.log(num);
-        makeDataTable(source, '全部', num)
+    function page(num, city2) {
+        // console.log(num,city2);
+        makeDataTable(source, city2, num)
     }
 
     // ▲製作下拉選單的函式
     function makeDropSelect(array) {
-        let option = "";
+        let option = `<option value='全部'>全部</option>`;
         array.forEach(city => {
             option = option + `<option value='${city}'>${city}</option>`;
         })
@@ -213,13 +213,14 @@
     // ▲DIY製作datatable表格的函式↓↓↓
     // ◆ 一．先準備好要用到的成員(變數)，及城市定義有二種變成show
     function makeDataTable(data, city, page) {
-
+        // console.log("city:"+city+",page:"+page);
         let tr, td, text, img, show;
         let tableData;
         let cell = ['Photo', 'Name', 'Address', 'Tel', 'OpenHours'];
-
+        // console.log(data);
         if (city == "全部") {
             show = data;
+            // console.log(show);
         } else {
             show = new Array();
             data.forEach(item => {
@@ -227,15 +228,16 @@
                     show.push(item);
                 }
             })
+            // console.log(show);
         }
 
         // 先清空不然載入不同城市時會衝到
         $("#list tbody").html("");
 
         // ◆ 二．製作分頁
-        let all = data.length;
-        let div = 10;
-        let pages = Math.ceil(all / 10);
+        let all = show.length;
+        let div = 5;
+        let pages = Math.ceil(all / div);
         let now = page;
         let start = (now - 1) * div;
         // ↓↓↓arr.slice(begin, end)begin 為開始的索引值，負數代表從後面開始算起，-1為倒數第一個元素。end 為結束的索引值，沒有填寫時則得到arr中的所有元素。
@@ -247,16 +249,17 @@
         $("#paginator").html(function () {
             let pg = "";
             let prev = (now - 1 > 0) ? now - 1 : 1;
-            pg = `<a href='javascript:page(${prev})'> < </a>`;
+            pg = `<a href='javascript:page(${prev},"${city}")'> < </a>`;
 
             for (let i = 1; i <= pages; i++) {
                 // 當前頁背景著色
                 let sel = (i == page) ? 'sel-page' : '';
-                pg = pg + `<a href='javascript:page(${i})' class='${sel}'> &nbsp; ${i} &nbsp; </a>`;
+                pg = pg + `<a href='javascript:page(${i},"${city}")' class='${sel}'> &nbsp; ${i} &nbsp; </a>`;
             }
 
             let next = (now + 1 <= pages) ? now + 1 : pages;
-            pg = pg + `<a href='javascript:page(${next})'> > </a>`;
+            pg = pg + `<a href='javascript:page(${next},"${city}")'> > </a>`;
+            // console.log(pg);
             return pg;
         })
 
